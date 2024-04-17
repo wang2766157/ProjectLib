@@ -1,0 +1,164 @@
+﻿@page "/"
+@inject IHttpContextAccessor httpContextAccessor
+@inject NavigationManager NavigationManager
+
+<div class="page-wrapper">
+    <div class="container-xl">
+        <!-- Page title -->
+        <div class="page-header d-print-none">
+            <div class="row g-2 align-items-center">
+                <div class="col">
+                    <div class="page-pretitle">(开发中)</div>
+                    <h2 class="page-title">KKAP-Web 开发相关 窍门</h2>
+                </div>
+                <!-- Page title actions -->
+                <div class="col-12 col-md-auto ms-auto d-print-none">
+                    <div class="btn-list">
+                        <span class="d-none d-sm-inline">
+                            <a Href="javascript:void(0)" class="btn btn-white" @onclick="AddDir">添加目录</a>
+                        </span>
+                        <a Href="javascript:void(0)" class="btn btn-primary d-none d-sm-inline-block" @onclick="AddImg">添加图片(开发中)</a>
+                        <a Href="javascript:void(0)" class="btn btn-primary d-none d-sm-inline-block" @onclick="AddDoc">添加新文档</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="page-body">
+        <div class="container-xl">
+            <div class="row row-deck row-cards">
+                <div class="col-12">
+                    <div class="card card-md">
+                        <div class="card-stamp card-stamp-lg">
+                            <div class="card-stamp-icon bg-primary"><TablerSvg IconName="home"></TablerSvg></div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-10">
+                                    <h3 class="h1">说明</h3>
+                                    <div class="markdown text-secondary">
+                                        <p>本网站总结一些平时 KKAP Web 项目相关的问题或经验; </p>
+                                        <p>网站的文档内容用 Markdown 标记语言编写 参考 <a href="https://markdown.com.cn/basic-syntax/headings.html" target="_blank">Markdown 官方教程</a> 和 <a href="https://zhuanlan.zhihu.com/p/143586985" target="_blank">语法全面详解(知乎外链)</a>; </p>
+                                        <p>网站的文档中也有 Markdown 相关的说明讲解文档</p>
+                                        <p>其他内容请咨询网站项目开发; </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card card-sm">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    <span class="bg-blue text-white avatar"><TablerSvg IconName="home"></TablerSvg></span>
+                                </div>
+                                <div class="col">
+                                    <div class="font-weight-medium">
+                                       访客 IP :
+                                    </div>
+                                    <div class="text-muted">
+                                        @ip
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<LoginModal @ref="lm" OnBackData="LMOnBackDataHandler"></LoginModal>
+<CreateDirModal @ref="cdm" OnBackData="CDMOnBackDataHandler"></CreateDirModal>
+<UploadDocModal @ref="udm" OnBackData="UDMOnBackDataHandler"></UploadDocModal>
+
+@code {
+    string ip = "";
+    private LoginModal lm = new LoginModal();
+    private CreateDirModal cdm = new CreateDirModal();
+    private UploadDocModal udm = new UploadDocModal();
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            ip = httpContextAccessor.HttpContext.Connection?.RemoteIpAddress.ToString();
+            StateHasChanged();
+        }
+    }
+    //记录当前调用的是哪个按钮
+    private string CallModal = "";
+    //登录后回调
+    private void LMOnBackDataHandler()
+    {
+        //是否登录成功
+        if (lm.MsgRes)
+        {
+            switch (CallModal)
+            {
+                case "CreateDirModal": cdm.ShowMsg(); break;
+                case "CreateImgModal":; break;
+                case "CreateIDocModal": udm.ShowMsg(); break;
+            }
+        }
+    }
+    #region 创建文件夹
+    //创建文件夹
+    private async Task AddDir()
+    {
+        CallModal = "CreateDirModal";
+        //是否登录成功
+        if (lm.MsgRes)
+        {
+            cdm.ShowMsg();//创建文件夹对话框
+        }
+        else
+        {
+            lm.ShowMsg();//登录
+        }
+    }
+    //创建文件夹 返回刷新页面
+    private void CDMOnBackDataHandler()
+    {
+        if (cdm.MsgRes)
+            NavigationManager.NavigateTo(NavigationManager.Uri, true);
+    }
+    #endregion
+    //添加图片
+    private async Task AddImg()
+    {
+        CallModal = "CreateImgModal";
+        //是否登录成功
+        if (lm.MsgRes)
+        {
+
+        }
+        else
+        {
+            lm.ShowMsg();//登录
+        }
+    }
+    #region 添加新文档
+    //添加新文档
+    private async Task AddDoc()
+    {
+        CallModal = "CreateIDocModal";
+        //是否登录成功
+        if (lm.MsgRes)
+        {
+            udm.ShowMsg();
+        }
+        else
+        {
+            lm.ShowMsg();//登录
+        }
+    }
+    //添加新文档 返回刷新页面
+    private void UDMOnBackDataHandler()
+    {
+        if (udm.MsgRes)
+            NavigationManager.NavigateTo(NavigationManager.Uri, true);
+    }
+    #endregion
+}

@@ -1,0 +1,8 @@
+﻿@page "/"
+@namespace ProjectLib.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    Layout = "_Layout";
+}
+@*页面主入口*@
+<component type="typeof(App)" render-mode="ServerPrerendered" />

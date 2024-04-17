@@ -1,0 +1,47 @@
+﻿#blazor-error-ui {
+    background: lightyellow;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+}
+
+app {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    min-height: 100vh;
+}
+
+/* 表格样式临时补救 */
+.markdown > table, .table {
+    --tblr-table-color-type: initial;
+    --tblr-table-bg-type: initial;
+    --tblr-table-color-state: initial;
+    --tblr-table-bg-state: initial;
+    --tblr-table-color: inherit;
+    --tblr-table-bg: transparent;
+    --tblr-table-border-color: var(--tblr-border-color-translucent);
+    --tblr-table-accent-bg: transparent;
+    --tblr-table-striped-color: inherit;
+    --tblr-table-striped-bg: var(--tblr-bg-surface-tertiary);
+    --tblr-table-active-color: inherit;
+    --tblr-table-active-bg: rgba(0, 0, 0, 0.1);
+    --tblr-table-hover-color: inherit;
+    --tblr-table-hover-bg: rgba(0, 0, 0, 0.075);
+    width: 100%;
+    margin-bottom: 1rem;
+    vertical-align: top;
+    border-color: var(--tblr-table-border-color)
+}

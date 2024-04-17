@@ -1,0 +1,71 @@
+﻿@inject IJSRuntime jsRuntime
+
+@if (IsShow)
+{
+    <!-- 登录对话框 -->
+    <div class="modal modal-blur" id="modal-connect" tabindex="-1" style="display:block" role="dialog" aria-modal="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">登录</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="CloseMsg"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-6"><TablerInput Title="登录名" Placeholder="请输入登录名" @bind-ValueStr="UserName" NOAutoComplete="true"></TablerInput></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-6"><TablerInput Title="密码" Placeholder="请输入密码" @bind-ValueStr="Pwd" NOAutoComplete="true" IsPassword="true"></TablerInput></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="javascript:void(0);" class="btn btn-link link-secondary" data-bs-dismiss="modal" @onclick="CloseMsg">取消</a>
+                    <a href="javascript:void(0);" class="btn btn-primary" data-bs-dismiss="modal" @onclick="Login">登录</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+}
+
+@code {
+    //外部参数
+    [Parameter] public bool IsShow { get; set; } = false;
+    [Parameter] public string UserName { get; set; } = "";
+    [Parameter] public string Pwd { get; set; } = "";
+    //触发返回数据的事件
+    [Parameter] public EventCallback OnBackData { get; set; }
+    //返回
+    [Parameter] public bool MsgRes { get; set; } = false;
+    //登录
+    private async Task Login()
+    {
+        if (UserName == "Admin" && Pwd == "890401")
+        {
+            MsgRes = true;
+            await OnBackData.InvokeAsync();
+            CloseMsg();
+        }
+        else
+        {
+            await jsRuntime.InvokeVoidAsync("alert", "用户名密码错误!");
+        }
+    }
+
+    //外部方法 : 显示/关闭页面
+    public void CloseMsg()
+    {
+        IsShow = false;
+        StateHasChanged();
+    }
+    public void ShowMsg()
+    {
+        IsShow = true;
+        StateHasChanged();
+    }
+    //初始化
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+    }
+}

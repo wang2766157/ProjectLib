@@ -1,0 +1,29 @@
+﻿@inject SystemService SysSvc
+
+<!-- 菜单 -->
+<div class="collapse navbar-collapse" id="navbar-menu">
+    <div class="navbar navbar-light">
+        <div class="container-xl">
+            <ul class="navbar-nav">
+                <CascadingValue Value="NavList">
+                    <NavUnit TarNavList="Root" />
+                </CascadingValue>
+            </ul>
+        </div>
+    </div>
+</div>
+
+@code {
+    List<NavModel> NavList = new List<NavModel>();
+    List<NavModel> Root = new List<NavModel>();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            NavList = await SysSvc.GetNavListAsync();
+            Root = NavList.Where(n => n.PID == "").ToList();
+            StateHasChanged();//这个方法会标记组件即将被渲染。
+        }
+    }
+}

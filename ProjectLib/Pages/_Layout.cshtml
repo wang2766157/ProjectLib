@@ -1,0 +1,48 @@
+﻿@using Microsoft.AspNetCore.Components.Web
+@namespace ProjectLib.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="~/" />
+    <link href="/Tabler.Core/css/tabler.css" rel="stylesheet" />
+    <link href="/Tabler.Core/css/tabler-flags.css" rel="stylesheet" />
+    <link href="/Tabler.Core/css/tabler-payments.css" rel="stylesheet" />
+    <link href="/Tabler.Core/css/tabler-vendors.css" rel="stylesheet" />
+    <link href="/Tabler.Core/css/demo.css" rel="stylesheet" />
+    <link href="/Tabler.Core/css/site.css" rel="stylesheet" />
+    <link href="/Tabler.Core/libs/highlight/styles/vs2015.css" rel="stylesheet" />
+</head>
+<body class=" layout-fluid">
+    @RenderBody()
+    <div id="blazor-error-ui">
+        <environment include="Staging,Production">
+            发生错误。此应用程序在重新加载之前可能不再响应。
+        </environment>
+        <environment include="Development">
+            (开发)出错啦，麻烦啦，赶紧去看看浏览器日志呀~
+        </environment>
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+    @*脚本和CSS引用时要带上解决方案名和wwwroot路径*@
+    <!-- Libs JS -->
+    <script src="/Tabler.Core/libs/jquery3.7.0/jquery-3.7.0.min.js" defer></script>
+    <script src="/Tabler.Core/libs/apexcharts/dist/apexcharts.min.js" defer></script>
+    <script src="/Tabler.Core/libs/jsvectormap/dist/js/jsvectormap.min.js" defer></script>
+    <script src="/Tabler.Core/libs/jsvectormap/dist/maps/world.js" defer></script>
+    <script src="/Tabler.Core/libs/jsvectormap/dist/maps/world-merc.js" defer></script>
+    <!-- Tabler Core -->
+    <script src="/Tabler.Core/js/tabler.js" defer></script>
+    <script src="/Tabler.Core/js/demo.js" defer></script>
+    <!-- 其他脚本 -->
+    <script src="/Tabler.Core/libs/highlight/highlight.min.js"></script>
+    <!-- 页面临时脚本导入 -->
+    <script src="/Tabler.Core/js/scriptloader.js"></script>
+    <!--Blazor 脚本 (blazor.server.js) 与服务器建立 SignalR 连接。 脚本由 ASP.NET Core 共享框架中的嵌入资源提供给客户端应用。 客户端应用负责根据需要保持和还原应用状态。-->
+    <script src="_framework/blazor.server.js"></script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+﻿@inject IJSRuntime jsRuntime
+
+@if (IsShow)
+{
+    <!-- 对话框 -->
+    <div class="modal modal-blur" id="modal-connect" tabindex="-1" style="display:block" role="dialog" aria-modal="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">创建文件夹</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="CloseMsg"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="mb-3">
+                                <div class="form-label">选择已有的文件夹</div>
+                                <select class="form-select" @bind="selectedValue">
+                                    <option value=""></option>
+                                    @foreach (var d in DirList)
+                                    {
+                                        <option value="@d">@d</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <TablerInput Title="输入文件夹名" Placeholder="请输入文件夹名" @bind-ValueStr="NewDirName" NOAutoComplete="true"></TablerInput>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="javascript:void(0);" class="btn btn-link link-secondary" data-bs-dismiss="modal" @onclick="CloseMsg">取消</a>
+                    <a href="javascript:void(0);" class="btn btn-primary" data-bs-dismiss="modal" @onclick="Save">保存</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+}
+
+@code {
+    //私有变量
+    private string NewDirName { get; set; } = "";
+    private string selectedValue = "";
+    private List<string> DirList { get; set; } = new List<string>();
+    //外部参数
+    [Parameter] public bool IsShow { get; set; } = false;
+    //返回
+    [Parameter] public bool MsgRes { get; set; } = false;
+    //触发返回数据的事件
+    [Parameter] public EventCallback OnBackData { get; set; }
+    //保存
+    private async Task Save()
+    {
+        try
+        {
+            //根目录
+            var path = Environment.CurrentDirectory + "/Documents";
+            if (!string.IsNullOrEmpty(NewDirName))
+            {
+                if (!string.IsNullOrEmpty(selectedValue))
+                {
+                    var olddirectory = path + "/" + selectedValue;
+                    var newdirectory = path + "/" + NewDirName;
+                    Microsoft.VisualBasic.FileSystem.Rename(olddirectory, newdirectory);
+                }
+                else
+                {
+                    if (!Directory.Exists(path + "/" + NewDirName))
+                        Directory.CreateDirectory(path + "/" + NewDirName);
+                }
+                MsgRes = true;
+                await OnBackData.InvokeAsync();
+                CloseMsg();
+            }
+            else
+            {
+                await jsRuntime.InvokeVoidAsync("alert", "请输入文件夹名称!");
+            }
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+
+    //外部方法 : 显示/关闭页面
+    public void CloseMsg()
+    {
+        IsShow = false;
+        StateHasChanged();
+    }
+    public void ShowMsg()
+    {
+        IsShow = true;
+        StateHasChanged();
+    }
+    //初始化
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            //根目录
+            var path = Environment.CurrentDirectory + "/Documents";
+            foreach (var dir in Directory.GetDirectories(path))
+            {
+                DirList.Add(dir.Replace(path + "\\", ""));
+            }
+            StateHasChanged();//这个方法会标记组件即将被渲染。
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+}

@@ -1,0 +1,124 @@
+﻿@page "/Md"
+@page "/Md/{ID}"
+@inject IJSRuntime jsRuntime
+@inject NavigationManager NavigationManager
+@using System.Text;
+@using Markdig;
+@using System.IO.Compression;
+
+<div class="page-wrapper">
+    <div class="page-body d-print-none">
+        <div class="container-xl">
+            <div class="row">
+                <div class="col-md-11 col-lg-10">
+                    @((MarkupString)ContentStr)
+                </div>
+                <div class="col-md-1 col-lg-2">
+                    <div class="row row-cards">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-status-top bg-red"></div>
+                                <div class="card-header"><h3 class="card-title">其他资源</h3></div>
+                                <div class="card-body">
+                                    <div class="row mb-3">
+                                        <div class="col">
+                                            <a href="javascript:void(0);" class="btn ms-auto" @onclick="CopyTextToClipboard">复制链接</a>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <a href="javascript:void(0);" class="btn ms-auto" @onclick="DownloadFile">下载此文件</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string ID { get; set; } = "";
+    public string ContentStr { get; set; } = "";
+    private string filePath = "";
+    private string OldID = "";
+    //初始化
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await jsRuntime.InvokeVoidAsync("loadscript", "/Tabler.Core/js/md.js");//指引调用哪个 js 文件 第一个参数固定
+        if (!string.IsNullOrEmpty(ID) && (firstRender || ID != OldID))
+        {
+            try
+            {
+                var res = "";
+                if (ID.Contains(">")) ID = ID.Replace(">", "/");
+                var path = Environment.CurrentDirectory + "/Documents/" + ID + ".md";
+                filePath = "Documents/" + ID + ".md";
+                using (StreamReader sr = new StreamReader(path, Encoding.UTF8))
+                {
+                    var sm = sr.ReadToEnd();
+                    res = sm;
+                }
+                ContentStr = Markdown.ToHtml(res);
+                StateHasChanged();//这个方法会标记组件即将被渲染。
+                await jsRuntime.InvokeVoidAsync("HLLoad");
+                OldID = ID;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+    //
+    private async Task CopyTextToClipboard()
+    {
+        await jsRuntime.InvokeVoidAsync("MD", NavigationManager.Uri);
+    }
+    //
+    private async Task DownloadFile()
+    {
+        try
+        {
+            var uri = NavigationManager.BaseUri;
+            string fileUrl = uri + filePath + ".zip"; // 替换为实际文件URL
+            var filesrc = Environment.CurrentDirectory + "/" + filePath;
+            //下载前清空目录下的zip文件
+            var deldic = Path.GetDirectoryName(filesrc);
+            foreach (string fp in Directory.GetFiles(deldic, "*.zip"))
+            {
+                File.Delete(fp);
+            }
+            //压缩文件
+            CompressFile(filesrc, filesrc + ".zip");
+            await jsRuntime.InvokeVoidAsync("DownloadFileFun", fileUrl);
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+    private void CompressFile(string sourceFile, string compressedFile)
+    {
+        // 创建文件流
+        using (FileStream sourceStream = new FileStream(sourceFile, FileMode.Open))
+        {
+            // 创建压缩文件流
+            using (FileStream compressedStream = File.Create(compressedFile))
+            {
+                // 创建压缩流
+                using (GZipStream compressor = new GZipStream(compressedStream, CompressionMode.Compress))
+                {
+                    // 复制文件流到压缩流
+                    sourceStream.CopyTo(compressor);
+                }
+            }
+        }
+    }
+}

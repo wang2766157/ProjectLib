@@ -1,0 +1,122 @@
+﻿@inject IJSRuntime jsRuntime
+
+@if (IsShow)
+{
+    <!-- 对话框 -->
+    <div class="modal modal-blur" id="modal-connect" tabindex="-1" style="display:block" role="dialog" aria-modal="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">上传文件</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @onclick="CloseMsg"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="mb-3">
+                                <div class="form-label">选择上传到哪个文件夹</div>
+                                <select class="form-select" @bind="selectedValue">
+                                    <option value=""></option>
+                                    @foreach (var d in DirList)
+                                    {
+                                        <option value="@d">@d</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="mb-3">
+                                <div class="form-label">选择一个文件</div>
+                                <InputFile OnChange="@LoadFiles" class="form-control" accept=".md" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    @*<a href="javascript:void(0);" class="btn btn-link link-secondary" data-bs-dismiss="modal" @onclick="CloseMsg">取消</a>*@
+                    <a href="javascript:void(0);" class="btn btn-primary" data-bs-dismiss="modal" @onclick="CloseModal">关闭</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+}
+
+@code {
+    //私有变量
+    //private List<IBrowserFile> loadedFiles = new();
+    private bool isLoading;
+    private string selectedValue = "";
+    private List<string> DirList { get; set; } = new List<string>();
+    //外部参数
+    [Parameter] public bool IsShow { get; set; } = false;
+    //返回
+    [Parameter] public bool MsgRes { get; set; } = false;
+    //触发返回数据的事件
+    [Parameter] public EventCallback OnBackData { get; set; }
+    //关闭 触发刷新画面
+    private async Task CloseModal()
+    {
+        try
+        {
+            MsgRes = true;
+            await OnBackData.InvokeAsync();
+            CloseMsg();
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+    private async Task LoadFiles(InputFileChangeEventArgs e)
+    {
+        isLoading = true;
+        //loadedFiles.Clear();
+        //根目录
+        var root = Environment.CurrentDirectory + "/Documents";
+        foreach (var file in e.GetMultipleFiles())
+        {
+            try
+            {
+                var path = Path.Combine(root, selectedValue, file.Name);
+                await using FileStream fs = new(path, FileMode.Create);
+                await file.OpenReadStream().CopyToAsync(fs);
+                //loadedFiles.Add(file);
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        isLoading = false;
+    }
+    //外部方法 : 显示/关闭页面
+    public void CloseMsg()
+    {
+        IsShow = false;
+        StateHasChanged();
+    }
+    public void ShowMsg()
+    {
+        IsShow = true;
+        StateHasChanged();
+    }
+    //初始化
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            //根目录
+            var path = Environment.CurrentDirectory + "/Documents";
+            foreach (var dir in Directory.GetDirectories(path))
+            {
+                DirList.Add(dir.Replace(path + "\\", ""));
+            }
+            StateHasChanged();//这个方法会标记组件即将被渲染。
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+}

@@ -1,0 +1,102 @@
+﻿
+@foreach (var item in TarNavList)
+{
+    if (item.IsParent == 1)//根节点
+    {
+        string dd = "";
+        var tmp = AllList.Where(x => x.PID == item.ID).ToList();
+        if (tmp.Count > 0) dd = "dropdown";
+        <li class="nav-item @dd">
+            @if (tmp.Count > 0)
+            {
+                <a class="nav-link dropdown-toggle" href="@item.Url" data-bs-toggle="dropdown" data-bs-auto-close="@databsautoclose" role="button" aria-expanded="false">
+                    <span class="nav-link-icon d-md-none d-lg-inline-block"><TablerSvg IconName="@item.Icon"></TablerSvg></span>
+                    <span class="nav-link-title">@item.Title</span>
+                </a>
+                <div class="dropdown-menu">
+                    @if (tmp.Count() > 7)
+                    {
+                        var tmp1 = new List<NavModel>();
+                        var tmp2 = new List<NavModel>();
+                        int f = tmp.Count() / 2;
+                        for (int i = 0; i < tmp.Count(); i++)
+                        {
+                            if (i <= f)
+                                tmp1.Add(tmp[i]);
+                            else
+                                tmp2.Add(tmp[i]);
+                        }
+                        <div class="dropdown-menu-columns">
+                            <div class="dropdown-menu-column">
+                                <NavUnit TarNavList="@tmp1" />
+                            </div>
+                            <div class="dropdown-menu-column">
+                                <NavUnit TarNavList="@tmp2" />
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <NavUnit TarNavList="@tmp" />
+                    }
+                </div>
+            }
+            else
+            {
+                <a class="nav-link" href="@item.Url">
+                    <span class="nav-link-icon d-md-none d-lg-inline-block"><TablerSvg IconName="@item.Icon"></TablerSvg></span>
+                    <span class="nav-link-title">@item.Title</span>
+                </a>
+            }
+        </li>
+    }
+    else if (item.IsParent == 2)//2级节点
+    {
+        var tmp2 = AllList.Where(x => x.PID == item.ID).ToList();
+        <div class="dropend">
+            <a class="dropdown-item dropdown-toggle" href="@item.Url" data-bs-toggle="dropdown" data-bs-auto-close="@databsautoclose" role="button" aria-expanded="false">
+                @if (!string.IsNullOrEmpty(item.Icon))
+                {
+                    <TablerSvg IconName="@item.Icon" AddClass="icon-inline me-1"></TablerSvg>
+                }
+                @item.Title
+                @if (@item.IsNew == 1)
+                {
+                    <span class="badge badge-sm bg-green text-uppercase ms-2">New</span>
+                }
+            </a>
+            @if (tmp2.Count > 0)
+            {
+                <div class="dropdown-menu"><NavUnit TarNavList="@tmp2" /></div>
+            }
+        </div>
+    }
+    else
+    {
+        <a class="dropdown-item @item.TextColorCss" href="@item.Url" target="@(item.IsTarget==1?"_blank":"")" rel="@(item.IsTarget==1?"noopener":"")">
+            @if (!string.IsNullOrEmpty(item.Icon))
+            {
+                <TablerSvg IconName="@item.Icon" AddClass="icon-inline me-1"></TablerSvg>
+            }
+            @item.Title
+            @if (@item.IsNew == 1)
+            {
+                <span class="badge badge-sm bg-green text-uppercase ms-2">New</span>
+            }
+        </a>
+    }
+}
+
+@code {
+    [Parameter]
+    public List<NavModel> TarNavList { get; set; }
+
+    [CascadingParameter]
+    List<NavModel> AllList { get; set; }
+
+    string databsautoclose = "true";
+}
+
+<!-- data-bs-auto-close true 下拉菜单 自动关闭 -->
+<!-- data-bs-auto-close false 下拉菜单 非自动关闭 在 vertical 模式下 使用 -->
+<!-- data-bs-auto-close outside 下拉菜单 浮动在外侧 在 horizontal 模式下 使用 -->

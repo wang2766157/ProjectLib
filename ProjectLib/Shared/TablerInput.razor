@@ -1,0 +1,65 @@
+﻿@using System.ComponentModel;
+
+<div class="mb-3" style="@hiddenstyle">
+    <label class="form-label">@Title</label>
+    @if (ForbiddenType == InputForbidden.IsDisabled)
+    {
+        <input type="@typestr" class="form-control" name="input" placeholder="@Placeholder" value="@ValueStr" oninput="@ChangeParentValue" autocomplete="@autocompletestr" disabled>
+    }
+    else if (ForbiddenType == InputForbidden.IsReadonly)
+    {
+        <input type="@typestr" class="form-control" name="input" placeholder="@Placeholder" value="@ValueStr" oninput="@ChangeParentValue" autocomplete="@autocompletestr" readonly>
+    }
+    else
+    {
+        <input type="@typestr" class="form-control" name="input" placeholder="@Placeholder" value="@ValueStr" oninput="@ChangeParentValue" list="@Title.ToString()list" autocomplete="@autocompletestr">
+    }
+    @if (!(Datalists is null))
+    {
+        <datalist id="@Title.ToString()list">
+            @foreach (var item in Datalists)
+            {
+                <option value="@item"></option>
+            }
+        </datalist>
+    }
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = "";
+    [Parameter] public string Placeholder { get; set; } = "";
+    [Parameter] public string ValueStr { get; set; } = "";
+    [Parameter] public EventCallback<string> ValueStrChanged { get; set; }
+    [Parameter] public InputForbidden ForbiddenType { get; set; } = InputForbidden.IsBlank;
+    [Parameter] public bool IsPassword { get; set; } = false;
+    [Parameter] public bool IsHidden { get; set; } = false;
+    [Parameter] public bool NOAutoComplete { get; set; } = false;
+    [Parameter] public List<string>? Datalists { get; set; }
+
+    private string autocompletestr = "on";
+    private string typestr = "text";
+    private string hiddenstyle = "";
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (IsPassword) typestr = "password";
+            if (IsHidden) { typestr = "hidden"; hiddenstyle = "height:0px;width:0px;display:none;"; }
+            if (NOAutoComplete) autocompletestr = "off";
+            StateHasChanged();
+        }
+        base.OnAfterRender(firstRender);
+    }
+    private async Task ChangeParentValue(ChangeEventArgs e)
+    {
+        var str = e.Value.ToString();
+        await ValueStrChanged.InvokeAsync(str);
+    }
+    public enum InputForbidden
+    {
+        IsBlank,
+        IsDisabled,
+        IsReadonly
+    }
+}
